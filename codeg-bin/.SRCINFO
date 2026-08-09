@@ -1,0 +1,20 @@
+pkgbase = codeg-bin
+	pkgdesc = Collaborative multi-agent AI coding workspace: aggregate sessions from Claude Code, Codex, OpenCode, Pi, Grok Build, etc. (prebuilt)
+	pkgver = 0.23.5.r2077.gaa0c4d6
+	pkgrel = 1
+	url = https://github.com/dongliang/codeg-aur
+	arch = x86_64
+	license = Apache-2.0
+	depends = webkit2gtk-4.1
+	depends = gtk3
+	depends = libayatana-appindicator
+	depends = librsvg
+	depends = libsecret
+	depends = openssl
+	provides = codeg
+	conflicts = codeg
+	conflicts = codeg-git
+	source = https://github.com/dongliang/codeg-aur/releases/download/v0.23.5.r2077.gaa0c4d6/codeg-git-0.23.5.r2077.gaa0c4d6-1-x86_64.pkg.tar.zst
+	sha256sums = ce502cb760bcfe39a87a8ec75ab851ecf300fb5d86a15e9c2ecd463e0b3e148d
+
+pkgname = codeg-bin

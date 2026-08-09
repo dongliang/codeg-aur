@@ -1,8 +1,6 @@
 src/
 pkg/
 codeg/
-codeg-git/
-codeg-bin/
 *.pkg.tar.zst
 *.pkg.tar.zst.sig
 *.db.tar.zst

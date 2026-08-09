@@ -1,0 +1,27 @@
+# Maintainer: dongliang <dongliang17@gmail.com>
+# Contributor: feitao (upstream)
+
+pkgname=codeg-bin
+pkgver=0.23.5.r2077.gaa0c4d6
+pkgrel=1
+pkgdesc="Collaborative multi-agent AI coding workspace: aggregate sessions from Claude Code, Codex, OpenCode, Pi, Grok Build, etc. (prebuilt)"
+arch=('x86_64')
+url="https://github.com/dongliang/codeg-aur"
+license=('Apache-2.0')
+depends=(
+  'webkit2gtk-4.1'
+  'gtk3'
+  'libayatana-appindicator'
+  'librsvg'
+  'libsecret'
+  'openssl'
+)
+conflicts=('codeg' 'codeg-git')
+provides=('codeg')
+source=("https://github.com/dongliang/codeg-aur/releases/download/v0.23.5.r2077.gaa0c4d6/codeg-git-0.23.5.r2077.gaa0c4d6-1-x86_64.pkg.tar.zst")
+sha256sums=('ce502cb760bcfe39a87a8ec75ab851ecf300fb5d86a15e9c2ecd463e0b3e148d')
+
+package() {
+  bsdtar -x -f "$srcdir/codeg-git-0.23.5.r2077.gaa0c4d6-1-x86_64.pkg.tar.zst" -C "$pkgdir" usr
+  ln -s codeg-git "$pkgdir/usr/share/licenses/codeg-bin"
+}
