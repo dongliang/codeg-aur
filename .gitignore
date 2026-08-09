@@ -5,3 +5,5 @@ codeg/
 *.pkg.tar.zst.sig
 *.db.tar.zst
 *.files.tar.zst
+codeg-aur.db
+codeg-aur.files
