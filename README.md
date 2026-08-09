@@ -2,6 +2,19 @@
 
 [codeg](https://github.com/xintaofei/codeg)（多 Agent AI 编码工作台）的 Arch Linux 打包仓库。
 
+## 关于（About）
+
+**codeg**（Code Generation）是一个多 Agent AI 编码工作台：在一个桌面应用里统一运行并聚合 Claude Code、Codex、OpenCode、Gemini CLI 等 AI 编码代理的会话，支持主代理向子代理委派任务、多代理协作、MCP/Skills 管理、git worktree 并行开发等。由 [xintaofei/codeg](https://github.com/xintaofei/codeg) 开发，Apache-2.0 许可。
+
+**codeg-aur** 是其 Arch Linux 打包仓库，提供两种安装方式：
+
+| 包 | 类型 | 特点 |
+|---|---|---|
+| `codeg-git` | 源码构建 | 本地编译，跟随上游 main 最新提交，链接 Arch 官方 webkit2gtk |
+| `codeg-bin` | 预编译 | 复用官方发布构建产物，免编译即装即用 |
+
+> 背景：官方分发的 AppImage 存在 WebKit 打包缺陷（捆绑库的 libexec 路径错误、缺少辅助进程），在 Arch 系系统上启动即崩溃。本仓库的源码构建版链接系统 webkit2gtk-4.1，彻底绕开该问题。
+
 ## 安装方式（二选一）
 
 ### 方式 1：预编译版 codeg-bin（推荐，免编译）
