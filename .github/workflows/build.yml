@@ -1,0 +1,147 @@
+name: build
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: codeg-aur-build
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: xintaofei/codeg
+  UPSTREAM_BRANCH: main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      needs_build: ${{ steps.check.outputs.needs_build }}
+      upstream_sha: ${{ steps.check.outputs.upstream_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+      - name: Fetch upstream SHA
+        id: sha
+        run: |
+          SHA=$(curl -fsSL "https://api.github.com/repos/${UPSTREAM_REPO}/commits/${UPSTREAM_BRANCH}" | python3 -c "import json,sys;print(json.load(sys.stdin)['sha'])")
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+      - name: Compare with last built
+        id: check
+        run: |
+          LAST="$(cat pages/x86_64/.last-built-sha 2>/dev/null || echo none)"
+          echo "last-built=${LAST}"
+          echo "current=${{ steps.sha.outputs.sha }}"
+          if [ "$LAST" = "${{ steps.sha.outputs.sha }}" ]; then
+            echo "needs_build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_build=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "upstream_sha=${{ steps.sha.outputs.sha }}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: check
+    if: needs.check.outputs.needs_build == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:latest
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: System update and install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed base-devel git rust nodejs pnpm
+
+      - name: Create builder user
+        run: |
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builder "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build codeg-git package
+        run: |
+          cd repo/codeg-git
+          su builder -c "makepkg -f"
+
+      - name: Compute version and checksum
+        id: pkg
+        run: |
+          PKGFILE=$(ls repo/codeg-git/codeg-git-*.pkg.tar.zst)
+          VER=${PKGFILE##*/codeg-git-}
+          VER=${VER%-x86_64.pkg.tar.zst}
+          SHA=$(sha256sum "$PKGFILE" | cut -d' ' -f1)
+          echo "ver=${VER}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SHA}" >> "$GITHUB_OUTPUT"
+          echo "pkgfile=${PKGFILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes || echo "release may already exist, continuing"
+
+      - name: Update codeg-bin PKGBUILD
+        run: |
+          cd repo/codeg-bin
+          sed -i "s/^pkgver=.*/pkgver=${{ steps.pkg.outputs.ver }}/" PKGBUILD
+          sed -i "s|^source=.*|source=(\"https://github.com/${GITHUB_REPOSITORY}/releases/download/v${{ steps.pkg.outputs.ver }}/codeg-git-${{ steps.pkg.outputs.ver }}-1-x86_64.pkg.tar.zst\")|" PKGBUILD
+          sed -i "s/^sha256sums=.*/sha256sums=('${{ steps.pkg.outputs.sha256 }}')/" PKGBUILD
+
+      - name: Build codeg-bin package
+        run: |
+          cd repo/codeg-bin
+          su builder -c "makepkg -f"
+
+      - name: Upload codeg-bin to Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "v${{ steps.pkg.outputs.ver }}" repo/codeg-bin/codeg-bin-*.pkg.tar.zst --clobber
+
+      - name: Update pacman repo and publish to gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p x86_64
+          rm -f x86_64/codeg-bin-*.pkg.tar.zst
+          cp repo/codeg-bin/codeg-bin-*.pkg.tar.zst x86_64/
+          cd x86_64
+          repo-add -R codeg-aur.db.tar.zst codeg-bin-*.pkg.tar.zst
+          rm -f codeg-aur.db codeg-aur.files
+          echo "${{ needs.check.outputs.upstream_sha }}" > .last-built-sha
+          cd ..
+          git clone --branch gh-pages --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages 2>/dev/null || git init -b gh-pages pages
+          cp -r x86_64/. pages/x86_64/
+          cd pages
+          git config user.name "codeg-aur CI"
+          git config user.email "ci@users.noreply.github.com"
+          git add -A
+          git commit -m "Update repo to ${{ steps.pkg.outputs.ver }}" || echo "nothing to commit"
+          git push origin gh-pages
+
+      - name: Commit updated codeg-bin PKGBUILD to master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd repo
+          git config user.name "codeg-aur CI"
+          git config user.email "ci@users.noreply.github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/repo"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          cd codeg-bin
+          makepkg --printsrcinfo > .SRCINFO
+          cd ..
+          git add codeg-bin/PKGBUILD codeg-bin/.SRCINFO
+          git commit -m "codeg-bin: bump to ${{ steps.pkg.outputs.ver }} [skip ci]" || echo "nothing to commit"
+          git push origin master
