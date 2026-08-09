@@ -15,6 +15,8 @@ permissions:
 env:
   UPSTREAM_REPO: xintaofei/codeg
   UPSTREAM_BRANCH: main
+  CARGO_BUILD_JOBS: "2"
+  CARGO_INCREMENTAL: "0"
 
 jobs:
   check:
@@ -61,6 +63,7 @@ jobs:
         run: |
           pacman -Syu --noconfirm
           pacman -S --noconfirm --needed base-devel git rust nodejs pnpm webkit2gtk-4.1 gtk3 libayatana-appindicator librsvg libsecret openssl
+          pacman -Scc --noconfirm
 
       - name: Create builder user
         run: |
