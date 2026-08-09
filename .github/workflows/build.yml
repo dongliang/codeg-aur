@@ -119,6 +119,8 @@ jobs:
           cd x86_64
           repo-add -R codeg-aur.db.tar.zst codeg-bin-*.pkg.tar.zst
           rm -f codeg-aur.db codeg-aur.files
+          zstd -d codeg-aur.db.tar.zst -o codeg-aur.db
+          zstd -d codeg-aur.files.tar.zst -o codeg-aur.files
           echo "${{ needs.check.outputs.upstream_sha }}" > .last-built-sha
           cd ..
           git clone --branch gh-pages --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages 2>/dev/null || git init -b gh-pages pages
