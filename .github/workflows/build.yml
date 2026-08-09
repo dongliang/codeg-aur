@@ -60,7 +60,7 @@ jobs:
       - name: System update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed base-devel git rust nodejs pnpm
+          pacman -S --noconfirm --needed base-devel git rust nodejs pnpm webkit2gtk-4.1 gtk3 libayatana-appindicator librsvg libsecret openssl
 
       - name: Create builder user
         run: |
