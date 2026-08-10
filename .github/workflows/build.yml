@@ -62,7 +62,7 @@ jobs:
       - name: System update and install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm --needed base-devel git rust nodejs pnpm webkit2gtk-4.1 gtk3 libayatana-appindicator librsvg libsecret openssl
+          pacman -S --noconfirm --needed base-devel git rust nodejs pnpm webkit2gtk-4.1 gtk3 libayatana-appindicator librsvg libsecret openssl github-cli
           pacman -Scc --noconfirm
 
       - name: Create builder user
@@ -97,7 +97,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes || echo "release may already exist, continuing"
+          if ! gh release create "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes 2>&1 | tee /tmp/release-create.log; then
+            if gh release view "v${{ steps.pkg.outputs.ver }}" >/dev/null 2>&1; then
+              echo "release already exists, continuing"
+            else
+              cat /tmp/release-create.log
+              exit 1
+            fi
+          fi
 
       - name: Update codeg-bin PKGBUILD
         run: |
