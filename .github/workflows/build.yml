@@ -99,7 +99,8 @@ jobs:
         run: |
           if ! gh release create -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes > /tmp/release-create.log 2>&1; then
             if gh release view -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" >/dev/null 2>&1; then
-              echo "release already exists, continuing"
+              echo "release already exists, replacing asset with --clobber"
+              gh release upload -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --clobber
             else
               cat /tmp/release-create.log
               exit 1
