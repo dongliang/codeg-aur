@@ -97,8 +97,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! gh release create "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes 2>&1 | tee /tmp/release-create.log; then
-            if gh release view "v${{ steps.pkg.outputs.ver }}" >/dev/null 2>&1; then
+          if ! gh release create -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" "${{ steps.pkg.outputs.pkgfile }}" --title "codeg ${{ steps.pkg.outputs.ver }}" --generate-notes > /tmp/release-create.log 2>&1; then
+            if gh release view -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" >/dev/null 2>&1; then
               echo "release already exists, continuing"
             else
               cat /tmp/release-create.log
@@ -122,7 +122,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "v${{ steps.pkg.outputs.ver }}" repo/codeg-bin/codeg-bin-*.pkg.tar.zst --clobber
+          gh release upload -R "$GITHUB_REPOSITORY" "v${{ steps.pkg.outputs.ver }}" repo/codeg-bin/codeg-bin-*.pkg.tar.zst --clobber
 
       - name: Update pacman repo and publish to gh-pages
         env:
