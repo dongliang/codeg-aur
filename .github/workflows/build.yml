@@ -74,13 +74,15 @@ jobs:
 
       - name: Build codeg-git package
         run: |
+          sed -i 's/ debug / !debug /' /etc/makepkg.conf
           cd repo/codeg-git
           su builder -c "makepkg -f"
+          rm -f *-debug-*.pkg.tar.zst
 
       - name: Compute version and checksum
         id: pkg
         run: |
-          PKGFILE=$(ls repo/codeg-git/codeg-git-*.pkg.tar.zst)
+          PKGFILE=$(ls repo/codeg-git/codeg-git-*.pkg.tar.zst | grep -v '\-debug\-' | head -1)
           VER=${PKGFILE##*/codeg-git-}
           VER=${VER%-x86_64.pkg.tar.zst}
           SHA=$(sha256sum "$PKGFILE" | cut -d' ' -f1)
