@@ -83,10 +83,13 @@ jobs:
         id: pkg
         run: |
           PKGFILE=$(ls repo/codeg-git/codeg-git-*.pkg.tar.zst | grep -v '\-debug\-' | head -1)
-          VER=${PKGFILE##*/codeg-git-}
-          VER=${VER%-x86_64.pkg.tar.zst}
+          VERREL=${PKGFILE##*/codeg-git-}
+          VERREL=${VERREL%-x86_64.pkg.tar.zst}
+          REL=${VERREL##*-}
+          VER=${VERREL%-*}
           SHA=$(sha256sum "$PKGFILE" | cut -d' ' -f1)
           echo "ver=${VER}" >> "$GITHUB_OUTPUT"
+          echo "rel=${REL}" >> "$GITHUB_OUTPUT"
           echo "sha256=${SHA}" >> "$GITHUB_OUTPUT"
           echo "pkgfile=${PKGFILE}" >> "$GITHUB_OUTPUT"
 
@@ -100,7 +103,7 @@ jobs:
         run: |
           cd repo/codeg-bin
           sed -i "s/^pkgver=.*/pkgver=${{ steps.pkg.outputs.ver }}/" PKGBUILD
-          sed -i "s|^source=.*|source=(\"https://github.com/${GITHUB_REPOSITORY}/releases/download/v${{ steps.pkg.outputs.ver }}/codeg-git-${{ steps.pkg.outputs.ver }}-1-x86_64.pkg.tar.zst\")|" PKGBUILD
+          sed -i "s|^source=.*|source=(\"https://github.com/${GITHUB_REPOSITORY}/releases/download/v${{ steps.pkg.outputs.ver }}/codeg-git-${{ steps.pkg.outputs.ver }}-${{ steps.pkg.outputs.rel }}-x86_64.pkg.tar.zst\")|" PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=('${{ steps.pkg.outputs.sha256 }}')/" PKGBUILD
 
       - name: Build codeg-bin package
