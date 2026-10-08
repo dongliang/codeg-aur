@@ -50,6 +50,11 @@ jobs:
   build:
     needs: check
     if: needs.check.outputs.needs_build == 'true'
+    # A failed build must not fail the workflow run. `.last-built-sha` is only
+    # written on success, so the next scheduled run retries on its own; leaving
+    # the run green keeps failure notifications (scheduled-workflow ones go to
+    # whoever last touched the cron) out of the mailbox.
+    continue-on-error: true
     runs-on: ubuntu-latest
     container:
       image: archlinux/archlinux:latest

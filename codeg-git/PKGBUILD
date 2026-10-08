@@ -47,6 +47,13 @@ build() {
   cd "$srcdir/codeg"
   export HUSKY=0
   pnpm tauri build --no-bundle
+
+  # `codeg-server` is feature-gated behind `server-bin` (src-tauri/Cargo.toml)
+  # and `tauri build` deliberately leaves it out of the build, so it needs its
+  # own cargo invocation: the one upstream uses (`pnpm server:build`, and the
+  # "Build server" step of upstream's release workflow).
+  cd src-tauri
+  cargo build --release --bin codeg-server --no-default-features --features server-bin
 }
 
 package() {
