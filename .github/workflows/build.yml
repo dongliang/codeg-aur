@@ -145,6 +145,10 @@ jobs:
           echo "${{ needs.check.outputs.upstream_sha }}" > .last-built-sha
           cd ..
           git clone --branch gh-pages --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages 2>/dev/null || git init -b gh-pages pages
+          # The database only ever lists the current package, so older ones in
+          # gh-pages are dead weight — and there was one per build, ~70 MB each
+          # (~10 GB by now), which every run then re-cloned. Drop them.
+          rm -f pages/x86_64/codeg-bin-*.pkg.tar.zst
           cp -r x86_64/. pages/x86_64/
           cd pages
           git config user.name "codeg-aur CI"
