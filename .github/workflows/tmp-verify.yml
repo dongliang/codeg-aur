@@ -1,0 +1,31 @@
+name: tmp-verify
+
+# Temporary: reproduces the "Commit updated codeg-bin PKGBUILD to master" step
+# of build.yml in ~a minute, to check `su builder -c "makepkg --printsrcinfo"`
+# works in this container before waiting ~45 min on the real thing.
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:latest
+      options: --user root
+    steps:
+      - name: Deps
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm --needed base-devel git
+
+      - name: Replicate the step
+        run: |
+          useradd -m builder
+          git clone --branch master --depth 1 https://github.com/dongliang/codeg-aur.git master-repo
+          cd master-repo
+          su builder -c "cd codeg-bin && makepkg --printsrcinfo" > codeg-bin/.SRCINFO
+          echo "--- exit=$? ---"
+          echo "--- wc: $(wc -c < codeg-bin/.SRCINFO) bytes ---"
+          head -14 codeg-bin/.SRCINFO
+          git add codeg-bin/.SRCINFO
+          git status --short
