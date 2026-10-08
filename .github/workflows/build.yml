@@ -161,8 +161,12 @@ jobs:
           cp repo/codeg-bin/PKGBUILD master-repo/codeg-bin/PKGBUILD
           cd master-repo
           # makepkg refuses to run as root, and this step (unlike the ones above)
-          # runs as root — hence `su builder`, like the package builds do.
+          # runs as root — hence `su builder`, like the package builds do. It
+          # also needs a writable $BUILDDIR, so hand the package directory to
+          # builder; `.git` stays root-owned to keep git happy.
+          chown -R builder codeg-bin
           su builder -c "cd codeg-bin && makepkg --printsrcinfo" > codeg-bin/.SRCINFO
+          echo "--- .SRCINFO: $(wc -l < codeg-bin/.SRCINFO) lines ---"
           git config user.name "codeg-aur CI"
           git config user.email "ci@users.noreply.github.com"
           git add codeg-bin/PKGBUILD codeg-bin/.SRCINFO

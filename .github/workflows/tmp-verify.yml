@@ -23,6 +23,7 @@ jobs:
           useradd -m builder
           git clone --branch master --depth 1 https://github.com/dongliang/codeg-aur.git master-repo
           cd master-repo
+          chown -R builder codeg-bin
           su builder -c "cd codeg-bin && makepkg --printsrcinfo" > codeg-bin/.SRCINFO
           echo "--- exit=$? ---"
           echo "--- wc: $(wc -c < codeg-bin/.SRCINFO) bytes ---"
