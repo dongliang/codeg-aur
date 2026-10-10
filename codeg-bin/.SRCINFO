@@ -1,6 +1,6 @@
 pkgbase = codeg-bin
 	pkgdesc = Collaborative multi-agent AI coding workspace: aggregate sessions from Claude Code, Codex, OpenCode, Pi, Grok Build, etc. (prebuilt)
-	pkgver = 0.34.0.r3308.gfd135c8
+	pkgver = 0.34.0.r3309.g22e70a0
 	pkgrel = 1
 	url = https://github.com/dongliang/codeg-aur
 	arch = x86_64
@@ -14,7 +14,7 @@ pkgbase = codeg-bin
 	provides = codeg
 	conflicts = codeg
 	conflicts = codeg-git
-	source = https://github.com/dongliang/codeg-aur/releases/download/v0.34.0.r3308.gfd135c8/codeg-git-0.34.0.r3308.gfd135c8-1-x86_64.pkg.tar.zst
-	sha256sums = 3f3884fa2d6b67dfc498deac7cc7f5ba44a93bcee45d19d4abc217b349e9c747
+	source = https://github.com/dongliang/codeg-aur/releases/download/v0.34.0.r3309.g22e70a0/codeg-git-0.34.0.r3309.g22e70a0-1-x86_64.pkg.tar.zst
+	sha256sums = fc547379b3315a4e6ae77a30f7d0b6cc665ee9bde2ca482ace71e79d1565d7bc
 
 pkgname = codeg-bin
