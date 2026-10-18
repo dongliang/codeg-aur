@@ -2,7 +2,7 @@
 # Contributor: feitao (upstream)
 
 pkgname=codeg-bin
-pkgver=0.36.0.r3541.g2e657fa
+pkgver=0.37.0.r3549.g2ae6eaf
 pkgrel=1
 pkgdesc="Collaborative multi-agent AI coding workspace: aggregate sessions from Claude Code, Codex, OpenCode, Pi, Grok Build, etc. (prebuilt)"
 arch=('x86_64')
@@ -18,8 +18,8 @@ depends=(
 )
 conflicts=('codeg' 'codeg-git')
 provides=('codeg')
-source=("https://github.com/dongliang/codeg-aur/releases/download/v0.36.0.r3541.g2e657fa/codeg-git-0.36.0.r3541.g2e657fa-1-x86_64.pkg.tar.zst")
-sha256sums=('e0cc1a06607a9dc0871e1f0dae73144a521e5ff5f9d9aa044b61332c94fb3905')
+source=("https://github.com/dongliang/codeg-aur/releases/download/v0.37.0.r3549.g2ae6eaf/codeg-git-0.37.0.r3549.g2ae6eaf-1-x86_64.pkg.tar.zst")
+sha256sums=('ae98d1828e8cbfcf5e2753ced16a826487a5cca062604a09562a75f033d0c093')
 
 package() {
   bsdtar -x -f "$srcdir"/*.pkg.tar.zst -C "$pkgdir" usr
